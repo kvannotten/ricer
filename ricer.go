@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/spf13/viper"
 )
@@ -35,12 +36,24 @@ func main() {
 		return
 	}
 
+	var throttle = make(chan int, 4)
+	var wg sync.WaitGroup
+
 	files, _ := filepath.Glob(fmt.Sprintf("%s/*.tmpl", tmplDir))
 	for _, file := range files {
-		if err := handleTemplate(file); err != nil {
-			fmt.Println(err)
-		}
+		throttle <- 1
+		wg.Add(1)
+
+		go func(file string, wg *sync.WaitGroup, throttle chan int) {
+			defer wg.Done()
+			if err := handleTemplate(file); err != nil {
+				fmt.Println(err)
+			}
+			<-throttle
+		}(file, &wg, throttle)
 	}
+
+	wg.Wait()
 }
 
 func parseConfiguration() error {
