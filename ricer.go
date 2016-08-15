@@ -25,8 +25,6 @@ import (
 	"os"
 	"os/user"
 	"path"
-	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/spf13/viper"
@@ -52,27 +50,20 @@ func main() {
 		panic(err)
 	}
 
-	tmplDir, err := templatesDirectory()
-	if err != nil {
-		fmt.Printf("Templates directory does not exist, please create %s\n", tmplDir)
-		return
-	}
-
 	var throttle = make(chan int, 4)
 	var wg sync.WaitGroup
 
-	files, _ := filepath.Glob(fmt.Sprintf("%s/*.tmpl", tmplDir))
-	for _, file := range files {
+	for _, tmpl := range viper.AllKeys() {
 		throttle <- 1
 		wg.Add(1)
 
-		go func(file string, wg *sync.WaitGroup, throttle chan int) {
+		go func(tmpl string, wg *sync.WaitGroup, throttle chan int) {
 			defer wg.Done()
-			if err := handleTemplate(file); err != nil {
+			if err := handleTemplate(tmpl); err != nil {
 				fmt.Println(err)
 			}
 			<-throttle
-		}(file, &wg, throttle)
+		}(tmpl, &wg, throttle)
 	}
 
 	wg.Wait()
@@ -105,55 +96,59 @@ func configHomeDirectory() (string, error) {
 			}
 			homeDir = usr.HomeDir
 		}
-		configHome = path.Join(homeDir, "/.config")
+		configHome = path.Join(homeDir, ".config")
 	}
 
-	return path.Join(configHome, "/ricer"), nil
+	return path.Join(configHome, "ricer"), nil
 }
 
-func templatesDirectory() (string, error) {
+func templatePath(tmpl string) (string, error) {
 	config, err := configHomeDirectory()
 	if err != nil {
 		return "", err
 	}
 
-	return path.Join(config, "/templates"), nil
+	return path.Join(config, "templates", fmt.Sprintf("%s.tmpl", tmpl)), nil
 }
 
-func handleTemplate(file string) error {
+func handleTemplate(tmpl string) error {
 	var t *template.Template
 	var err error
 
 	// parse the template
+	file := viper.GetString(fmt.Sprintf("%s.input", tmpl))
+	if file == "" {
+		if file, err = templatePath(tmpl); err != nil {
+			return err
+		}
+	}
+
 	if t, err = template.ParseFiles(file); err != nil {
 		return fmt.Errorf("Could not parse template %s", file)
 	}
 
-	// get the template name based on the filename
-	tmplName := filepath.Base(strings.TrimSuffix(file, filepath.Ext(file)))
-
 	// get configuration details
-	m := viper.GetStringMap(fmt.Sprintf("%s.vars", tmplName))
-	outputFile := viper.GetString(fmt.Sprintf("%s.output", tmplName))
+	m := viper.GetStringMap(fmt.Sprintf("%s.vars", tmpl))
+	outputFile := viper.GetString(fmt.Sprintf("%s.output", tmpl))
 
 	// check if an output file is given
 	if outputFile == "" {
-		return fmt.Errorf("You have to define an output for template %s", tmplName)
+		return fmt.Errorf("You have to define an output for template %s", tmpl)
 	}
 
 	// create the path of the output file
 	path := path.Dir(outputFile)
 	if err := os.MkdirAll(path, os.ModePerm); err != nil {
-		return fmt.Errorf("[1] Could not create %s for template %s", outputFile, tmplName)
+		return fmt.Errorf("[1] Could not create %s for template %s", outputFile, tmpl)
 	}
 
 	// write the output file
 	var f *os.File
 	if f, err = os.Create(outputFile); err != nil {
-		return fmt.Errorf("[2] Could not create %s for template %s", outputFile, tmplName)
+		return fmt.Errorf("[2] Could not create %s for template %s", outputFile, tmpl)
 	}
 
-	fmt.Printf("Creating %s from template %s.\n", outputFile, tmplName)
+	fmt.Printf("Creating %s from template %s.\n", outputFile, file)
 	t.Execute(f, m)
 	f.Close()
 

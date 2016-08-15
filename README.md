@@ -2,6 +2,10 @@
 
 Generate your configuration files from templates.
 
+The name comes from the popular linux past time, ricing. You can find more information [here](https://wiki.installgentoo.com/index.php/GNU/Linux_ricing).
+
+The application thus aims to be only compatible with GNU/Linux, but can probably be used on macOS too.
+
 ## Installation
 
 #### Using go get
@@ -31,6 +35,7 @@ The config file has the following structure:
 ```
 ---
 mytemplatename:
+  input: /path/to/your/template
   output: /path/to/write/output/file
   vars:
     Some: template
@@ -38,6 +43,8 @@ mytemplatename:
     Want: to
     Use: !
 ```
+
+Please note that input is optional, it will default to `XDG_HOME_CONFIG/ricer/templates/mytemplatename.tmpl`
 
 ## Templates
 
@@ -79,6 +86,7 @@ And this configuration snippet:
 
 ```
 i3:
+  input: /home/kristof/.config/ricer/templates/i3_desktop.tmpl
   output: /home/kristof/.i3/config
   vars:
     Term: /usr/local/bin/st
