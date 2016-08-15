@@ -48,11 +48,7 @@ Please note that input is optional, it will default to `XDG_HOME_CONFIG/ricer/te
 
 ## Templates
 
-You have to have a configuration entry for every template you put in the templates directory.
-
-Templates' extensions should be `tmpl`, thus you can disable templates by using a different extension.
-
-Using our configuration example from above, we should create the following file: `XDG_HOME_CONFIG/ricer/templates/mytemplatename.tmpl`, which could contain the following:
+Using our configuration example from above, we should create the following file: `/path/to/your/template`, which could contain the following:
 
 
 **Note:** Ricer uses the go [html/template](https://golang.org/pkg/html/template/) package for its templates
