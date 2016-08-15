@@ -32,8 +32,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-var version string
-var buildDate string
+var (
+	version   string
+	buildDate string
+
+	config = flag.String("c", "", "(optional) the configuration file to use")
+)
 
 func main() {
 	flag.Usage = func() {
@@ -50,7 +54,7 @@ func main() {
 
 	tmplDir, err := templatesDirectory()
 	if err != nil {
-		fmt.Println("Templates directory does not exist, please create %s\n", tmplDir)
+		fmt.Printf("Templates directory does not exist, please create %s\n", tmplDir)
 		return
 	}
 
@@ -75,12 +79,16 @@ func main() {
 }
 
 func parseConfiguration() error {
-	viper.SetConfigName("config")
-	configHome, err := configHomeDirectory()
-	if err != nil {
-		return err
+	if *config == "" {
+		viper.SetConfigName("config")
+		configHome, err := configHomeDirectory()
+		if err != nil {
+			return err
+		}
+		viper.AddConfigPath(configHome)
+	} else {
+		viper.SetConfigFile(*config)
 	}
-	viper.AddConfigPath(configHome)
 
 	return viper.ReadInConfig()
 }
