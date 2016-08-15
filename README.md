@@ -54,6 +54,9 @@ Templates' extensions should be `tmpl`, thus you can disable templates by using 
 
 Using our configuration example from above, we should create the following file: `XDG_HOME_CONFIG/ricer/templates/mytemplatename.tmpl`, which could contain the following:
 
+
+**Note:** Ricer uses the go [html/template](https://golang.org/pkg/html/template/) package for its templates
+
 ```
 let my_option = {{.Some}}
 let option2 = {{.Variables}}
