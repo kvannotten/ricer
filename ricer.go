@@ -125,7 +125,7 @@ func handleTemplate(file string) error {
 	tmplName := filepath.Base(strings.TrimSuffix(file, filepath.Ext(file)))
 
 	// get configuration details
-	m := viper.GetStringMapString(fmt.Sprintf("%s.vars", tmplName))
+	m := viper.GetStringMap(fmt.Sprintf("%s.vars", tmplName))
 	outputFile := viper.GetString(fmt.Sprintf("%s.output", tmplName))
 
 	// check if an output file is given

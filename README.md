@@ -60,3 +60,37 @@ let my_option = template
 let option2 = you
 to = !
 ```
+
+## Real life examples
+
+#### i3 screens
+
+I use i3 as a window manager on both my desktop and my laptop, on my laptop I use 3 screens and on my desktop 2. So I need a way to define these screens in i3. Ricer can help with that.
+
+Conider this template:
+
+```
+# add screens
+{{ range $screen, $value := .Screens }}set ${{ $screen }} {{ $value }}
+{{ end }}
+```
+
+And this configuration snippet:
+
+```
+i3:
+  output: /home/kristof/.i3/config
+  vars:
+    Term: /usr/local/bin/st
+    Screens:
+      screen1: DVI-I-3
+      screen2: DVI-I-2
+```
+
+Runing `ricer` would result in the following i3 configuration output:
+
+```
+# add screens
+set $screen1 DVI-I-3
+set $screen2 DVI-I-2
+```
