@@ -54,6 +54,10 @@ func main() {
 	var wg sync.WaitGroup
 
 	for _, tmpl := range viper.AllKeys() {
+		if viper.GetBool(fmt.Sprintf("%s.disabled", tmpl)) {
+			continue
+		}
+
 		throttle <- 1
 		wg.Add(1)
 
