@@ -36,6 +36,7 @@ The config file has the following structure:
 ---
 mytemplatename:
   input: /path/to/your/template
+  disabled: false # optional, so you can disable the rendering of this template
   output: /path/to/write/output/file
   vars:
     Some: template
