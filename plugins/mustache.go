@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hoisie/mustache"
+	"github.com/cbroglie/mustache"
 )
 
 // Execute the template
@@ -23,7 +23,11 @@ func Execute(input, output string, data interface{}) error {
 	}
 
 	fmt.Printf("Creating %s from %s.\n", output, input)
-	o := t.Render(data)
+	o, err := t.Render(data)
+	if err != nil {
+		return err
+	}
+
 	f.WriteString(o)
 	f.Close()
 
