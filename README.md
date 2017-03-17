@@ -38,6 +38,7 @@ mytemplatename:
   input: /path/to/your/template
   disabled: false # optional, so you can disable the rendering of this template
   output: /path/to/write/output/file
+  engine: go_template
   vars:
     Some: template
     Variables: you
@@ -47,12 +48,14 @@ mytemplatename:
 
 Please note that input is optional, it will default to `XDG_HOME_CONFIG/ricer/templates/mytemplatename.tmpl`
 
+Engine is also optional and will default to `go_template`. You can easily add your own plugins, but we provide support for `go_template` for the default golang templating language, and for `mustache`, the mustache handlebars templating engine.
+
 ## Templates
 
 Using our configuration example from above, we should create the following file: `/path/to/your/template`, which could contain the following:
 
 
-**Note:** Ricer uses the go [html/template](https://golang.org/pkg/html/template/) package for its templates
+**Note:** These examples use the go [html/template](https://golang.org/pkg/html/template/) package for its templates. You can also choose to use the [mustache](https://mustache.github.io/) templating engine by specifying that engine in your template's configuration
 
 ```
 let my_option = {{.Some}}

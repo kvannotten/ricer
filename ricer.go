@@ -21,10 +21,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"html/template"
 	"os"
 	"os/user"
 	"path"
+	"plugin"
 	"sync"
 
 	"github.com/spf13/viper"
@@ -116,7 +116,6 @@ func templatePath(tmpl string) (string, error) {
 }
 
 func handleTemplate(tmpl string) error {
-	var t *template.Template
 	var err error
 
 	// parse the template
@@ -125,10 +124,6 @@ func handleTemplate(tmpl string) error {
 		if file, err = templatePath(tmpl); err != nil {
 			return err
 		}
-	}
-
-	if t, err = template.ParseFiles(file); err != nil {
-		return fmt.Errorf("Could not parse template %s", file)
 	}
 
 	// get configuration details
@@ -146,15 +141,37 @@ func handleTemplate(tmpl string) error {
 		return fmt.Errorf("[1] Could not create %s for template %s", outputFile, tmpl)
 	}
 
-	// write the output file
-	var f *os.File
-	if f, err = os.Create(outputFile); err != nil {
-		return fmt.Errorf("[2] Could not create %s for template %s", outputFile, tmpl)
+	templateEngine := viper.GetString(fmt.Sprintf("%s.engine", tmpl))
+	if templateEngine == "" {
+		templateEngine = "go_template"
 	}
 
-	fmt.Printf("Creating %s from template %s.\n", outputFile, file)
-	t.Execute(f, m)
-	f.Close()
+	execute := getTemplatingMethod(templateEngine)
+	execute(file, outputFile, m)
 
 	return nil
+}
+
+func pluginPath(pluginName string) (string, error) {
+	config, err := configHomeDirectory()
+	if err != nil {
+		return "", err
+	}
+
+	return path.Join(config, "plugins", fmt.Sprintf("%s.so", pluginName)), nil
+}
+
+func getTemplatingMethod(pluginName string) func(string, string, interface{}) error {
+	path, _ := pluginPath(pluginName)
+	p, err := plugin.Open(path)
+	if err != nil {
+		panic(err)
+	}
+
+	execute, err := p.Lookup("Execute")
+	if err != nil {
+		panic(err)
+	}
+
+	return execute.(func(string, string, interface{}) error)
 }
