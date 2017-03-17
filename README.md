@@ -12,9 +12,9 @@ The application thus aims to be only compatible with GNU/Linux, but can probably
 
   1. Download https://github.com/kvannotten/ricer/releases/download/v0.2/ricer_x64.tar.gz
   2. `tar xzvf ricer_x64.tar.gz`
-  3. cp ricer/ricer /usr/bin/
-  4. mkdir -p ~/.config/ricer/{plugins,templates}
-  4. cp ricer/*.so ~/.config/ricer/plugins/
+  3. `cp ricer/ricer /usr/bin/`
+  4. `mkdir -p ~/.config/ricer/{plugins,templates}`
+  4. `cp ricer/*.so ~/.config/ricer/plugins/`
 
 #### Using git
 
