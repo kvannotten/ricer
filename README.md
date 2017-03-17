@@ -30,7 +30,7 @@ The application thus aims to be only compatible with GNU/Linux, but can probably
   3. Add templates to use
   4. Run ricer, it will automatically parse all config files and output them
   
-Usually `XDG_HOME_CONFIG` is ~/.config
+Usually `XDG_CONFIG_HOME` is ~/.config
   
 ## Advanced
 
