@@ -34,7 +34,8 @@ var (
 	version   string
 	buildDate string
 
-	config = flag.String("c", "", "(optional) the configuration file to use")
+	config      = flag.String("c", "", "(optional) the configuration file to use")
+	environment = flag.String("env", "default", "(optional) the environment that will be injected in every vars entry")
 )
 
 func main() {
@@ -128,6 +129,7 @@ func handleTemplate(tmpl string) error {
 
 	// get configuration details
 	m := viper.GetStringMap(fmt.Sprintf("%s.vars", tmpl))
+	m[*environment] = true
 	outputFile := viper.GetString(fmt.Sprintf("%s.output", tmpl))
 
 	// check if an output file is given
