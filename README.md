@@ -25,8 +25,8 @@ The application thus aims to be only compatible with GNU/Linux, but can probably
 
 ## Basic usage
 
-  1. Create a `XDG_HOME_CONFIG/ricer/templates` folder
-  2. Add a configuration file `XDG_HOME_CONFIG/ricer/config.yml`
+  1. Create a `XDG_CONFIG_HOME/ricer/templates` folder
+  2. Add a configuration file `XDG_CONFIG_HOME/ricer/config.yml`
   3. Add templates to use
   4. Run ricer, it will automatically parse all config files and output them
   
