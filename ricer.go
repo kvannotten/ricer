@@ -147,7 +147,10 @@ func handleTemplate(tmpl string) error {
 	}
 
 	execute := getTemplatingMethod(templateEngine)
-	execute(file, outputFile, m)
+	err = execute(file, outputFile, m)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
