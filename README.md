@@ -13,7 +13,7 @@ The application thus aims to be only compatible with GNU/Linux, but can probably
   1. `git clone https://github.com/kvannotten/ricer ~/go/src/github.com/kvannotten/ricer`
   2. `cd ~/go/src/github.com/kvannotten/ricer`
   3. `make # The makefile will compile and install the plugins in ~/.config/ricer/plugins`
-  4. `cp ricer SOMEWHEREINYOURPATH`
+  4. `make install`
 
 ## Basic usage
 
