@@ -20,6 +20,6 @@ clean:
 	rm -rf go_template.so mustache.so ricer
 
 install:
-	cp ricer /usr/bin/ricer
+	sudo cp ricer /usr/bin/ricer
 	mkdir -p ~/.config/ricer/plugins
 	cp *.so ~/.config/ricer/plugins/
