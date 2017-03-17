@@ -1,4 +1,4 @@
-VERSION="0.1"
+VERSION="0.2"
 BUILD_DATE="$(shell date -u +%Y-%m-%d_%H:%M)"
 
 all:
