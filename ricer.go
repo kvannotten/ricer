@@ -117,50 +117,33 @@ func templatePath(tmpl string) (string, error) {
 }
 
 func handleTemplate(tmpl string) error {
-	var err error
-
-	// parse the template
-	file := viper.GetString(fmt.Sprintf("%s.input", tmpl))
-	if file == "" {
-		if file, err = templatePath(tmpl); err != nil {
-			return err
-		}
-	}
-
-	// get configuration details
-	m := viper.GetStringMap(fmt.Sprintf("%s.vars", tmpl))
-	m[*environment] = true
-	outputFile := viper.GetString(fmt.Sprintf("%s.output", tmpl))
-
-	// check if an output file is given
-	if outputFile == "" {
-		return fmt.Errorf("You have to define an output for template %s", tmpl)
-	}
-
-	// create the path of the output file
-	path := path.Dir(outputFile)
-	if err := os.MkdirAll(path, os.ModePerm); err != nil {
-		return fmt.Errorf("[1] Could not create %s for template %s", outputFile, tmpl)
-	}
-
-	templateEngine := viper.GetString(fmt.Sprintf("%s.engine", tmpl))
-	if templateEngine == "" {
-		templateEngine = "go_template"
-	}
-
-	execute := getTemplatingMethod(templateEngine)
-	content, err := execute(file, m)
+	file, err := inputFile(tmpl)
 	if err != nil {
 		return err
 	}
 
-	// write the output file
-	var f *os.File
-	if f, err = os.Create(outputFile); err != nil {
-		return fmt.Errorf("[2] Could not create %s from %s", outputFile, file)
+	// get configuration details
+	m, err := templateVars(tmpl)
+	if err != nil {
+		return err
 	}
-	f.Write(content)
-	f.Close()
+
+	outputFile, err := outputFile(tmpl)
+	if err != nil {
+		return err
+	}
+
+	err = createDirectoryForPath(outputFile)
+	if err != nil {
+		return err
+	}
+
+	content, err := contentForTemplate(tmpl, file, m)
+	if err != nil {
+		return err
+	}
+
+	err = writeTemplateContentToFile(content, outputFile)
 
 	fmt.Printf("Created %s from %s\n", outputFile, file)
 
@@ -189,4 +172,66 @@ func getTemplatingMethod(pluginName string) func(string, interface{}) ([]byte, e
 	}
 
 	return execute.(func(string, interface{}) ([]byte, error))
+}
+
+func inputFile(tmpl string) (string, error) {
+	var err error
+
+	file := viper.GetString(fmt.Sprintf("%s.input", tmpl))
+	if file == "" {
+		if file, err = templatePath(tmpl); err != nil {
+			return "", err
+		}
+	}
+
+	return file, nil
+}
+
+func templateVars(tmpl string) (map[string]interface{}, error) {
+	m := viper.GetStringMap(fmt.Sprintf("%s.vars", tmpl))
+	m[*environment] = true
+
+	return m, nil
+}
+
+func outputFile(tmpl string) (string, error) {
+	outputFile := viper.GetString(fmt.Sprintf("%s.output", tmpl))
+	if outputFile == "" {
+		return "", fmt.Errorf("No output file defined for template %s", tmpl)
+	}
+
+	return outputFile, nil
+}
+
+func createDirectoryForPath(file string) error {
+	// create the path of the output file
+	path := path.Dir(file)
+	if err := os.MkdirAll(path, os.ModePerm); err != nil {
+		return fmt.Errorf("Failed to create path %s for %s.", path, file)
+	}
+
+	return nil
+}
+
+func contentForTemplate(tmpl, file string, m map[string]interface{}) ([]byte, error) {
+	templateEngine := viper.GetString(fmt.Sprintf("%s.engine", tmpl))
+	if templateEngine == "" {
+		templateEngine = "go_template"
+	}
+
+	execute := getTemplatingMethod(templateEngine)
+	return execute(file, m)
+}
+
+func writeTemplateContentToFile(content []byte, output string) error {
+	var err error
+
+	var f *os.File
+	if f, err = os.Create(output); err != nil {
+		return fmt.Errorf("[2] Could not create %s", output)
+	}
+	f.Write(content)
+	f.Close()
+
+	return nil
 }
