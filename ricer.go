@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/user"
 	"path"
@@ -133,8 +135,7 @@ func handleTemplate(tmpl string) error {
 		return err
 	}
 
-	err = createDirectoryForPath(outputFile)
-	if err != nil {
+	if err = createDirectoryForPath(outputFile); err != nil {
 		return err
 	}
 
@@ -143,7 +144,14 @@ func handleTemplate(tmpl string) error {
 		return err
 	}
 
-	err = writeTemplateContentToFile(content, outputFile)
+	if !templateContentChanged(content, outputFile) {
+		fmt.Printf("%s has not changed. Skipping...\n", outputFile)
+		return nil
+	}
+
+	if err = writeTemplateContentToFile(content, outputFile); err != nil {
+		return err
+	}
 
 	fmt.Printf("Created %s from %s\n", outputFile, file)
 
@@ -234,4 +242,13 @@ func writeTemplateContentToFile(content []byte, output string) error {
 	f.Close()
 
 	return nil
+}
+
+func templateContentChanged(content []byte, output string) bool {
+	c, err := ioutil.ReadFile(output)
+	if err != nil {
+		return true
+	}
+
+	return !bytes.Equal(content, c)
 }
