@@ -149,10 +149,20 @@ func handleTemplate(tmpl string) error {
 	}
 
 	execute := getTemplatingMethod(templateEngine)
-	err = execute(file, outputFile, m)
+	content, err := execute(file, m)
 	if err != nil {
 		return err
 	}
+
+	// write the output file
+	var f *os.File
+	if f, err = os.Create(outputFile); err != nil {
+		return fmt.Errorf("[2] Could not create %s from %s", outputFile, file)
+	}
+	f.Write(content)
+	f.Close()
+
+	fmt.Printf("Created %s from %s\n", outputFile, file)
 
 	return nil
 }
@@ -166,7 +176,7 @@ func pluginPath(pluginName string) (string, error) {
 	return path.Join(config, "plugins", fmt.Sprintf("%s.so", pluginName)), nil
 }
 
-func getTemplatingMethod(pluginName string) func(string, string, interface{}) error {
+func getTemplatingMethod(pluginName string) func(string, interface{}) ([]byte, error) {
 	path, _ := pluginPath(pluginName)
 	p, err := plugin.Open(path)
 	if err != nil {
@@ -178,5 +188,5 @@ func getTemplatingMethod(pluginName string) func(string, string, interface{}) er
 		panic(err)
 	}
 
-	return execute.(func(string, string, interface{}) error)
+	return execute.(func(string, interface{}) ([]byte, error))
 }
