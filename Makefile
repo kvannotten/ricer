@@ -1,6 +1,6 @@
 VERSION="0.2"
 BUILD_DATE="$(shell date -u +%Y-%m-%d_%H:%M)"
-UPX := $(shell command -v upxfd 2> /dev/null)
+UPX := $(shell command -v upx 2> /dev/null)
 
 all: ricer go_template.so mustache.so
 
