@@ -1,19 +1,19 @@
 VERSION="0.2"
-BUILD_DATE="$(shell date -u +%Y-%m-%d_%H:%M)"
+BUILD_DATE := "$(shell date -u +%Y-%m-%d_%H:%M)"
 UPX := $(shell command -v upx 2> /dev/null)
+GOCMD   := go
+GOBUILD := $(GOCMD) build
 
 all: ricer go_template.so mustache.so
 
-go_template.so:
-	go build -ldflags "-s" -buildmode=plugin -o go_template.so plugins/go_template.go
-
-mustache.so:
-	go build -ldflags "-s" -buildmode=plugin -o mustache.so plugins/mustache.go
+%.so: plugins/%.go
+	echo "FOO"
+	$(GOBUILD) -ldflags "-s" -buildmode=plugin -o $@ $<
 
 ricer:
-	go build -ldflags "-s -X main.version=$(VERSION) -X main.buildDate=$(BUILD_DATE)"
+	$(GOBUILD) -ldflags "-s -X main.version=$(VERSION) -X main.buildDate=$(BUILD_DATE)"
 ifdef UPX
-	upx ricer
+	$(UPX) ricer
 endif
 
 clean:
